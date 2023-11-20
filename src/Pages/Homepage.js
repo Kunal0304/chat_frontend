@@ -15,7 +15,7 @@ import Signup from "../components/Authentication/Signup";
 
 function Homepage() {
   const history = useHistory();
-  const [tabIndex, setTabIndex] = useState(0); 
+  const [activeTab, setActiveTab] = useState(0);
 
   useEffect(() => {
     const user = JSON.parse(localStorage.getItem("userInfo"));
@@ -23,8 +23,8 @@ function Homepage() {
     if (user) history.push("/chats");
   }, [history]);
 
-  const handleTabChange = (index) => {
-    setTabIndex(index);
+  const handleButtonClick = () => {
+    setActiveTab(0); // Set the index of the login tab
   };
 
   return (
@@ -44,17 +44,17 @@ function Homepage() {
         </Text>
       </Box>
       <Box bg="white" w="100%" p={4} borderRadius="lg" borderWidth="1px">
-        <Tabs isFitted variant="soft-rounded" index={tabIndex} onChange={handleTabChange}>
+        <Tabs isFitted variant="soft-rounded" index={activeTab}>
           <TabList mb="1em">
-            <Tab>Login</Tab>
-            <Tab>Sign Up</Tab>
+            <Tab onClick={() => setActiveTab(0)}>Login</Tab>
+            <Tab onClick={() => setActiveTab(1)}>Sign Up</Tab>
           </TabList>
           <TabPanels>
             <TabPanel>
               <Login />
             </TabPanel>
             <TabPanel>
-              <Signup  handleTabChange={handleTabChange}/>
+              <Signup handleButtonClick={handleButtonClick} />
             </TabPanel>
           </TabPanels>
         </Tabs>

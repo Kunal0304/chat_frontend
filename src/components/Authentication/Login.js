@@ -12,26 +12,52 @@ const Login = () => {
   const [show, setShow] = useState(false);
   const handleClick = () => setShow(!show);
   const toast = useToast();
-  const [email, setEmail] = useState();
-  const [password, setPassword] = useState();
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [loading, setLoading] = useState(false);
+  const [loginErrorStatus, setLoginErrorStatus] = useState(false);
+  const [loginError, setLoginError] = useState([]);
+
 
   const history = useHistory();
   const { setUser } = ChatState();
 
-  const submitHandler = async () => {
-    setLoading(true);
-    if (!email || !password) {
-      toast({
-        title: "Please Fill all the Feilds",
-        status: "warning",
-        duration: 5000,
-        isClosable: true,
-        position: "bottom",
-      });
-      setLoading(false);
-      return;
+  function isValidEmail(email) {
+    if (email !== undefined) {
+      if (!/\S+@\S+\.\S+/.test(email)) {
+        return false;
+      } else {
+        return true;
+      }
+    } else {
+      return true;
     }
+  }
+
+  const submitHandler = async () => {
+    const errors = []
+    // Validate Email
+    if (!email.trim()) {
+      errors.push({ field: 'email', message: 'Please enter your email' });
+    } else if (!isValidEmail(email)) {
+      errors.push({ field: 'email', message: 'Email ID is not valid' });
+    }
+
+    // Validate Password
+    if (!password.trim()) {
+      errors.push({ field: 'password', message: 'Please enter your password' });
+    } else if (password.length < 6) {
+      errors.push({ field: 'password', message: 'Password must be at least 6 characters long' });
+    }
+
+        // Check if there are any errors
+        if (errors.length > 0) {
+          setLoginErrorStatus(true);
+          setLoginError(errors);
+          return false;
+        } else {
+          setLoginErrorStatus(false)
+        }
 
     try {
       const config = {
@@ -40,8 +66,8 @@ const Login = () => {
         },
       };
 
-      const  data  = await axios.post(
-        "/login",
+      const { data } = await axios.post(
+        "/api/user/login",
         { email, password },
         config
       );
@@ -80,6 +106,13 @@ const Login = () => {
           placeholder="Enter Your Email Address"
           onChange={(e) => setEmail(e.target.value)}
         />
+                <div>
+          {loginErrorStatus && loginError.map(error => (
+            <>
+              {error.field === "email" && <p key={error.field} style={{ color: "red" }}>{error.message}</p>}
+            </>
+          ))}
+        </div>
       </FormControl>
       <FormControl id="password" isRequired>
         <FormLabel>Password</FormLabel>
@@ -96,6 +129,13 @@ const Login = () => {
             </Button>
           </InputRightElement>
         </InputGroup>
+        <div>
+            {loginErrorStatus && loginError.map(error => (
+              <>
+                {error.field === "password" && <p key={error.field} style={{ color: "red" }}>{error.message}</p>}
+              </>
+            ))}
+          </div>
       </FormControl>
       <Button
         colorScheme="blue"
@@ -111,7 +151,7 @@ const Login = () => {
         colorScheme="red"
         width="100%"
         onClick={() => {
-          setEmail("demo@gmail.com");
+          setEmail("kunal123@gmail.com");
           setPassword("123456");
         }}
       >
